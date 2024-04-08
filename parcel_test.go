@@ -31,20 +31,51 @@ func getTestParcel() Parcel {
 // TestAddGetDelete проверяет добавление, получение и удаление посылки
 func TestAddGetDelete(t *testing.T) {
 	// prepare
-	db, err := // настройте подключение к БД
+	db, err := sql.Open("sqlite","tracker.db")// настройте подключение к БД
+	if err != nil {
+        fmt.Println(err)
+        return
+    }
+    defer db.Close()
+
 	store := NewParcelStore(db)
 	parcel := getTestParcel()
 
 	// add
 	// добавьте новую посылку в БД, убедитесь в отсутствии ошибки и наличии идентификатора
+	res, err :=db.Exec("INSERT INTO parsel(client,status,address,created_at) VALUES (:client,:status,:address,:created_at)",
+		sql.Named("client", parsel.Client),
+		sql.Named("status", parsel.Status),
+		sql.Named("address", parsel.Address),
+		sql.Named("created_at", parsel.CreatedAt))
+	require.NoError(t,err)
+	require.NotNil(t,res.LastInsertId())
 
 	// get
 	// получите только что добавленную посылку, убедитесь в отсутствии ошибки
 	// проверьте, что значения всех полей в полученном объекте совпадают со значениями полей в переменной parcel
+	var testPars Parcel
+	row :=db.QueryRow("SELECT client,status,address,created_at FROM parsel WHERE id=:id",
+	sql.Named("id", res.LastInsertId()))
+	err := row.Scan(&testPars.Client, &testPars.Status, &testPars.Address, &testPars.CreatedAt)
+	require.Equal(t,parsel.Client,testPars.Client)
+	require.Equal(t,parsel.Status,testPars.Status)
+	require.Equal(t,parsel.Address,testPars.Address)
+	require.Equal(t,parsel.CreatedAt,testPars.CreatedAt)
 
 	// delete
 	// удалите добавленную посылку, убедитесь в отсутствии ошибки
 	// проверьте, что посылку больше нельзя получить из БД
+	id:=res.LastInsertId()
+	_, err := db.Exec("DELETE FROM parsel  WHERE id=:id ",
+		sql.Named("id", id)) 
+	require.NoError(t,err)
+
+	rows, err := s.db.Query("SELECT client,status,address,created_at FROM parsel WHERE id=:id",
+		sql.Named("id", id))
+	defer rows.Close()
+	require.Error(t,err)
+	
 }
 
 // TestSetAddress проверяет обновление адреса
