@@ -191,6 +191,6 @@ func TestGetByClient(t *testing.T) {
 		// значение - сама посылка
 		// убедитесь, что все посылки из storedParcels есть в parcelMap
 		// убедитесь, что значения полей полученных посылок заполнены верно
-		assert.Equal(t, storedParcels[parcel.Number], parcelMap[parcel.Number])
+		assert.Equal(t, parcelMap[parcel.Number], parcel)
 	}
 }
