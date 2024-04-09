@@ -45,7 +45,7 @@ func (s ParcelStore) Get(number int) (Parcel, error) {
 func (s ParcelStore) GetByClient(client int) ([]Parcel, error) {
 	// реализуйте чтение строк из таблицы parcel по заданному client
 	// здесь из таблицы может вернуться несколько строк
-	rows, err := s.db.Query("SELECT client,status,address,created_at FROM parcel WHERE client=:client",
+	rows, err := s.db.Query("SELECT number,client,status,address,created_at FROM parcel WHERE client=:client",
 		sql.Named("client", client))
 	//defer rows.Close()
 
@@ -54,7 +54,7 @@ func (s ParcelStore) GetByClient(client int) ([]Parcel, error) {
 	for rows.Next() {
 		p := Parcel{}
 
-		err := rows.Scan(&p.Client, &p.Status, &p.Address, &p.CreatedAt)
+		err := rows.Scan(&p.Number, &p.Client, &p.Status, &p.Address, &p.CreatedAt)
 		if err != nil {
 			err = fmt.Errorf("GetByClient error: %w", err)
 			return nil, err

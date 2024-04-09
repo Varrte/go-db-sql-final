@@ -173,10 +173,10 @@ func TestGetByClient(t *testing.T) {
 		require.NotNil(t, id)
 		// обновляем идентификатор добавленной у посылки
 		parcels[i].Number = id
-
 		// сохраняем добавленную посылку в структуру map, чтобы её можно было легко достать по идентификатору посылки
 		parcelMap[id] = parcels[i]
 	}
+	fmt.Println(parcelMap)
 
 	// get by client
 	storedParcels, err := store.GetByClient(client) // получите список посылок по идентификатору клиента, сохранённого в переменной client
