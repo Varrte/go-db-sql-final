@@ -45,7 +45,7 @@ func (s ParcelStore) GetByClient(client int) ([]Parcel, error) {
 	// здесь из таблицы может вернуться несколько строк
 	rows, err := s.db.Query("SELECT client,status,address,created_at FROM parsel WHERE id=:id",
 		sql.Named("id", client))
-	defer rows.Close()
+	//defer rows.Close()
 
 	// заполните срез Parcel данными из таблицы
 	var res []Parcel
