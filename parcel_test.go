@@ -67,7 +67,7 @@ func TestAddGetDelete(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = store.Get(id)
-	require.Error(t, err)
+	require.ErrorIs(t, err, sql.ErrNoRows, "sql: no rows in result set")
 
 }
 

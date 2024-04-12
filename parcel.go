@@ -22,8 +22,8 @@ func (s ParcelStore) Add(p Parcel) (int, error) {
 		sql.Named("address", p.Address),
 		sql.Named("created_at", p.CreatedAt))
 	if err != nil {
-		err = fmt.Errorf("Add error: %w", err)
-		return 0, err
+		return 0, fmt.Errorf("Add error: %w", err)
+
 	}
 	id, err := res.LastInsertId()
 	// верните идентификатор последней добавленной записи
@@ -47,20 +47,21 @@ func (s ParcelStore) GetByClient(client int) ([]Parcel, error) {
 	// здесь из таблицы может вернуться несколько строк
 	rows, err := s.db.Query("SELECT client,status,address,created_at FROM parcel WHERE client=:client",
 		sql.Named("client", client))
-	//defer rows.Close()
+	if err != nil {
+		return nil, fmt.Errorf("GetByClient error: %w", err)
+	}
 
 	// заполните срез Parcel данными из таблицы
 	var res []Parcel
 	for rows.Next() {
 		p := Parcel{}
-
 		err := rows.Scan(&p.Client, &p.Status, &p.Address, &p.CreatedAt)
 		if err != nil {
-			err = fmt.Errorf("GetByClient error: %w", err)
-			return nil, err
+			return nil, fmt.Errorf("GetByClient:rows.Scan error: %w", err)
 		}
 		res = append(res, p)
 	}
+
 	return res, err
 }
 
@@ -69,7 +70,6 @@ func (s ParcelStore) SetStatus(number int, status string) error {
 	_, err := s.db.Exec("UPDATE parcel SET status =:status WHERE number=:number",
 		sql.Named("status", status),
 		sql.Named("number", number))
-
 	return err
 }
 
@@ -78,10 +78,8 @@ func (s ParcelStore) SetAddress(number int, address string) error {
 	// менять адрес можно только если значение статуса registered
 	_, err := s.db.Exec("UPDATE parcel SET address =:address WHERE status=:status",
 		sql.Named("address", address),
-		sql.Named("status", "registered"))
-
+		sql.Named("status", ParcelStatusRegistered))
 	return err
-
 }
 
 func (s ParcelStore) Delete(number int) error {
@@ -89,7 +87,6 @@ func (s ParcelStore) Delete(number int) error {
 	// удалять строку можно только если значение статуса registered
 	_, err := s.db.Exec("DELETE FROM parcel  WHERE number=:number and status=:status",
 		sql.Named("number", number),
-		sql.Named("status", "registered"))
-
+		sql.Named("status", ParcelStatusRegistered))
 	return err
 }
